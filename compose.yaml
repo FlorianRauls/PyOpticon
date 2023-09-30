@@ -1,5 +1,19 @@
 services:
-  pyshark:
-    build:
-      context: .
+
+  tracker:
+    build: ./src/tracker/.
+    ports:
+      - '3000:3000'
+
+  tracker-db:
+    build: ./src/db/.
+    image: mysql
+    environment:
+      MYSQL_DATABASE: 'tracker'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+
 version: '3.9'
