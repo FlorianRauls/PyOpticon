@@ -1,0 +1,5 @@
+services:
+  pyshark:
+    build:
+      context: .
+version: '3.9'
