@@ -4,6 +4,13 @@ services:
     build: ./src/tracker/.
     ports:
       - '3000:3000'
+    environment:
+      MYSQL_HOST: tracker-db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ''
+      MYSQL_DB: tracker
+    networks:
+      - tracker-network
 
   tracker-db:
     build: ./src/db/.
@@ -15,5 +22,11 @@ services:
       - '3306:3306'
     expose:
       - '3306'
+    networks:
+      - tracker-network
+
+networks:
+  tracker-network:
+    driver: bridge
 
 version: '3.9'

@@ -36,19 +36,9 @@ def collectData(cursor):
 
         io_2 = psutil.net_io_counters()
         us, ds = io_2.bytes_sent - bytes_sent, io_2.bytes_recv - bytes_recv
-        print(f"Upload: {get_size(io_2.bytes_sent)}   "
-            f", Download: {get_size(io_2.bytes_recv)}   "
-            f", Upload Speed: {get_size(us / UPDATE_INTERVAL)}/s   "
-            f", Download Speed: {get_size(ds / UPDATE_INTERVAL)}/s      ", end="\r")
-
         bytes_sent, bytes_recv = io_2.bytes_sent, io_2.bytes_recv
         # insert data into database
         cursor.execute("INSERT INTO tracker (upload, download, upload_speed, download_speed) VALUES (%s, %s, %s, %s)", (get_size(io_2.bytes_sent), get_size(io_2.bytes_recv), get_size(us / UPDATE_INTERVAL), get_size(ds / UPDATE_INTERVAL)))
-        
-        cursor.execute("SHOW TABLES")
-        
-        for x in cursor:
-            print(x, flush=True)
 
 def run():
     app.run(debug=True, port=3000, host='0.0.0.0', useReloader=False)
@@ -59,8 +49,6 @@ if __name__ == "__main__":
     flaskThread = Thread(target=run)
     flaskThread.start()
     
-    print("Doing Stuff...")
-    
     app.secret_key = 'This'
     db_keys = yaml.load(open("db.yaml"),Loader=yaml.FullLoader)
     
@@ -68,7 +56,8 @@ if __name__ == "__main__":
     db = mysql.connector.connect(
         host=db_keys['mysql_host'],
         user=db_keys['mysql_user'],
-        password=db_keys['mysql_password']
+        password=db_keys['mysql_password'],
+        database="tracker"
         )
     
     # try and debug if anything works here lol
