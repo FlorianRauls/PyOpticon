@@ -23,14 +23,11 @@ def get_size(bytes):
         bytes /= 1024
         
         
-# get the network I/O stats from psutil
-io = psutil.net_io_counters()
-# extract the total bytes sent and received
-bytes_sent, bytes_recv = io.bytes_sent, io.bytes_recv
-
-
-
 def collectData(cursor):
+    # get the network I/O stats from psutil
+    io = psutil.net_io_counters()
+    # extract the total bytes sent and received
+    bytes_sent, bytes_recv = io.bytes_sent, io.bytes_recv
     while True:
         time.sleep(UPDATE_INTERVAL)
 
@@ -46,10 +43,9 @@ def run():
 
 if __name__ == "__main__":
     
-    flaskThread = Thread(target=run)
-    flaskThread.start()
+    # flaskThread = Thread(target=run)
+    # flaskThread.start()
     
-    app.secret_key = 'This'
     db_keys = yaml.load(open("db.yaml"),Loader=yaml.FullLoader)
     
     # connect to db
@@ -57,6 +53,7 @@ if __name__ == "__main__":
         host=db_keys['mysql_host'],
         user=db_keys['mysql_user'],
         password=db_keys['mysql_password'],
+        port="3306",
         database="tracker"
         )
     

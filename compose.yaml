@@ -11,10 +11,13 @@ services:
       MYSQL_DB: tracker
     networks:
       - tracker-network
+    depends_on:
+      - tracker-db
 
   tracker-db:
     build: ./src/db/.
     image: mysql
+    restart: always
     environment:
       MYSQL_DATABASE: 'tracker'
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
