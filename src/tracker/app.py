@@ -4,48 +4,11 @@ from flask import Flask, jsonify, request
 from threading import Thread
 import mysql.connector
 import yaml
+import time
 
 UPDATE_INTERVAL = 1
 
-app = Flask(__name__)
-
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-def get_size(bytes):
-    """
-    Returns size of bytes in a nice format
-    """
-    for unit in ['', 'K', 'M', 'G', 'T', 'P']:
-        if bytes < 1024:
-            return f"{bytes:.2f}{unit}B"
-        bytes /= 1024
-        
-        
-def collectData(cursor):
-    # get the network I/O stats from psutil
-    io = psutil.net_io_counters()
-    # extract the total bytes sent and received
-    bytes_sent, bytes_recv = io.bytes_sent, io.bytes_recv
-    while True:
-        time.sleep(UPDATE_INTERVAL)
-
-        io_2 = psutil.net_io_counters()
-        us, ds = io_2.bytes_sent - bytes_sent, io_2.bytes_recv - bytes_recv
-        bytes_sent, bytes_recv = io_2.bytes_sent, io_2.bytes_recv
-        # insert data into database
-        cursor.execute("INSERT INTO tracker (upload, download, upload_speed, download_speed) VALUES (%s, %s, %s, %s)", (get_size(io_2.bytes_sent), get_size(io_2.bytes_recv), get_size(us / UPDATE_INTERVAL), get_size(ds / UPDATE_INTERVAL)))
-
-def run():
-    app.run(debug=True, port=3000, host='0.0.0.0', useReloader=False)
-    
-
 if __name__ == "__main__":
-    
-    # flaskThread = Thread(target=run)
-    # flaskThread.start()
-    
     db_keys = yaml.load(open("db.yaml"),Loader=yaml.FullLoader)
     
     # connect to db
@@ -60,13 +23,54 @@ if __name__ == "__main__":
     # try and debug if anything works here lol
     mycursor = db.cursor()
     
-    # create database table if it doesn't exist with the following columns (id, upload, download, upload_speed, download_speed)
-    mycursor.execute("CREATE TABLE IF NOT EXISTS tracker (id INT AUTO_INCREMENT PRIMARY KEY, upload VARCHAR(255), download VARCHAR(255), upload_speed VARCHAR(255), download_speed VARCHAR(255))")
+    # a sql command as string which creates a table in the database called usage with the following columns (id, timestamp, upload, download, upload_speed, download_speed, memory_usage, cpu_usage, uptime, readtime, writetime)
+    create_table_command = """CREATE TABLE IF NOT EXISTS tracking (
+                                T datetime NOT NULL, 
+                                Upload_speed float, 
+                                Download_speed float, 
+                                Memory_usage float, 
+                                Cpu_usage float, 
+                                Uptime int, 
+                                Readtime float, 
+                                Writetime float);"""
+                                    
+    # create database table if it doesn't exist with the following columns (id, timestamp, upload, download, upload_speed, download_speed)
+    mycursor.execute(create_table_command)
+
+    
+    # counter for io
+    io = psutil.net_io_counters()
+    bytes_sent, bytes_recv = io.bytes_sent, io.bytes_recv
     
     
-    # run collect data in new thread and pass in mysql cursor
-    thread = Thread(target=collectData, args=(mycursor,))
-   
-    # start thread
-    thread.start()
-    
+    while True:
+        time.sleep(UPDATE_INTERVAL)
+
+        # get network usage
+        io_2 = psutil.net_io_counters()
+        us, ds = io_2.bytes_sent - bytes_sent, io_2.bytes_recv - bytes_recv
+        bytes_sent, bytes_recv = io_2.bytes_sent, io_2.bytes_recv
+
+        # get memory percentage
+        memory_percent = psutil.virtual_memory().percent
+        
+        # get cpu usage
+        cpu_percent = psutil.cpu_percent(interval=1)
+        
+        # get uptime
+        boot_time_timestamp = psutil.boot_time()
+        current_time_timestamp = time.time()
+        uptime_seconds = current_time_timestamp - boot_time_timestamp
+        
+        # get readtime and writetime
+        io_counters = psutil.disk_io_counters()
+        readtime = io_counters.read_time
+        writetime = io_counters.write_time
+        
+        # string to insert values into database
+        sql = """INSERT INTO tracking 
+                (T, Download_speed, Upload_speed, Memory_usage, Cpu_usage, Uptime, Readtime, Writetime) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+        values =  (time.strftime('%Y-%m-%d %H:%M:%S'), (ds / UPDATE_INTERVAL), (us / UPDATE_INTERVAL), memory_percent, cpu_percent, uptime_seconds, readtime, writetime)
+
+        mycursor.execute(sql, values)  
