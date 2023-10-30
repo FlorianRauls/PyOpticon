@@ -6,7 +6,8 @@ import mysql.connector
 import yaml
 import time
 
-UPDATE_INTERVAL = 1
+# how often to update the database in seconds
+UPDATE_INTERVAL = 60
 
 if __name__ == "__main__":
     db_keys = yaml.load(open("db.yaml"),Loader=yaml.FullLoader)
@@ -72,5 +73,9 @@ if __name__ == "__main__":
                 (T, Download_speed, Upload_speed, Memory_usage, Cpu_usage, Uptime, Readtime, Writetime) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
         values =  (time.strftime('%Y-%m-%d %H:%M:%S'), (ds / UPDATE_INTERVAL), (us / UPDATE_INTERVAL), memory_percent, cpu_percent, uptime_seconds, readtime, writetime)
+        
+        print(values)
 
         mycursor.execute(sql, values)  
+        mycursor.execute("commit")
+        
