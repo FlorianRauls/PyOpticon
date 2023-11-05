@@ -24,8 +24,9 @@ if __name__ == "__main__":
     # try and debug if anything works here lol
     mycursor = db.cursor()
     
-    # a sql command as string which creates a table in the database called usage with the following columns (id, timestamp, upload, download, upload_speed, download_speed, memory_usage, cpu_usage, uptime, readtime, writetime)
+    # create first table
     create_table_command = """CREATE TABLE IF NOT EXISTS tracking (
+                                Id int PRIMARY KEY,
                                 T datetime NOT NULL, 
                                 Upload_speed float, 
                                 Download_speed float, 
@@ -37,7 +38,18 @@ if __name__ == "__main__":
                                     
     # create database table if it doesn't exist with the following columns (id, timestamp, upload, download, upload_speed, download_speed)
     mycursor.execute(create_table_command)
+    mycursor.execute("commit")
 
+    # create table if it doesn't exist which records processes and their cpu usage and memory usage over time
+    create_table_command = """CREATE TABLE IF NOT EXISTS processes (
+                                Id int PRIMARY KEY,
+                                T datetime NOT NULL, 
+                                Name varchar(255), 
+                                Memory_usage float, 
+                                Cpu_usage float);"""    
+    
+    mycursor.execute(create_table_command)
+    mycursor.execute("commit")
     
     # counter for io
     io = psutil.net_io_counters()
@@ -46,6 +58,12 @@ if __name__ == "__main__":
     
     while True:
         time.sleep(UPDATE_INTERVAL)
+        
+        # get current datetime
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S')
+        
+        # create id from current time
+        id = int(current_time)
 
         # get network usage
         io_2 = psutil.net_io_counters()
@@ -67,15 +85,38 @@ if __name__ == "__main__":
         io_counters = psutil.disk_io_counters()
         readtime = io_counters.read_time
         writetime = io_counters.write_time
-        
+                
         # string to insert values into database
         sql = """INSERT INTO tracking 
-                (T, Download_speed, Upload_speed, Memory_usage, Cpu_usage, Uptime, Readtime, Writetime) 
+                (Id, T, Download_speed, Upload_speed, Memory_usage, Cpu_usage, Uptime, Readtime, Writetime) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
-        values =  (time.strftime('%Y-%m-%d %H:%M:%S'), (ds / UPDATE_INTERVAL), (us / UPDATE_INTERVAL), memory_percent, cpu_percent, uptime_seconds, readtime, writetime)
+        values =  (id, current_time, (ds / UPDATE_INTERVAL), (us / UPDATE_INTERVAL), memory_percent, cpu_percent, uptime_seconds, readtime, writetime)
         
-        print(values)
-
         mycursor.execute(sql, values)  
         mycursor.execute("commit")
+        
+        # get processes
+        processes = psutil.process_iter()
+        
+        # loop through processes
+        for process in processes:
+            # get process name
+            name = process.name()
+            
+            # get process memory usage
+            memory_usage = process.memory_percent()
+            
+            # get process cpu usage
+            cpu_usage = process.cpu_percent()
+            
+            # string to insert values into database
+            sql = """INSERT INTO processes 
+                    (Id, T, Name, Memory_usage, Cpu_usage) 
+                    VALUES (%s, %s, %s, %s, %s)"""
+            values =  (id, current_time, name, memory_usage, cpu_usage)
+            
+            mycursor.execute(sql, values)  
+            mycursor.execute("commit")
+        
+        
         
