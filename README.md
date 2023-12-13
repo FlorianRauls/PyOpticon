@@ -1,8 +1,4 @@
-The "PyOpticon" project is a work-in-progress Python project with a data pipeline focusing on the collection, storage, and potential analysis of process, hardware, and network data. Here's a structured README for the project:
-
----
-
-# PyOpticon Project
+# PyOpticon
 
 ## Overview
 The PyOpticon project is designed to monitor and analyze system performance and network data. It aims to provide insights into system processes, hardware efficiency, and network utilization.
