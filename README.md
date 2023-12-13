@@ -39,7 +39,3 @@ Contributions to the project are welcome. Please follow standard practices for c
 
 ## License
 MIT-License
-
----
-
-This README provides a clear overview of the current state of the project, its components, and future development plans. Feel free to modify it to suit the specifics and style of your project.
