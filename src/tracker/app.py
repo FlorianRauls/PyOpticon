@@ -107,7 +107,7 @@ if __name__ == "__main__":
             # string to insert values into database
             sql_2 = """INSERT INTO processes 
                     (T, Name, Memory_usage, Cpu_usage) 
-                    VALUES (%s, %s, %s, %s, %s)"""
+                    VALUES (%s, %s, %s, %s)"""
             values_2 =  (current_time, name, memory_usage, cpu_usage)
             
             mycursor.execute(sql_2, values_2)  
