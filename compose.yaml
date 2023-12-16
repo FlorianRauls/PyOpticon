@@ -28,6 +28,17 @@ services:
     networks:
       - tracker-network
 
+
+  dashboard:
+    build: ./src/dashboard/.
+    ports:
+      - '8080:8080'
+    networks:
+      - tracker-network
+    depends_on:
+      - tracker-db
+
+
 networks:
   tracker-network:
     driver: bridge
