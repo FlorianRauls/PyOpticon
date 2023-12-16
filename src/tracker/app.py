@@ -26,7 +26,6 @@ if __name__ == "__main__":
     
     # create first table
     create_table_command = """CREATE TABLE IF NOT EXISTS tracking (
-                                Id int PRIMARY KEY,
                                 T datetime NOT NULL, 
                                 Upload_speed float, 
                                 Download_speed float, 
@@ -42,7 +41,6 @@ if __name__ == "__main__":
 
     # create table if it doesn't exist which records processes and their cpu usage and memory usage over time
     create_table_command = """CREATE TABLE IF NOT EXISTS processes (
-                                Id int PRIMARY KEY,
                                 T datetime NOT NULL, 
                                 Name varchar(255), 
                                 Memory_usage float, 
@@ -61,9 +59,6 @@ if __name__ == "__main__":
         
         # get current datetime
         current_time = time.strftime('%Y-%m-%d %H:%M:%S')
-        
-        # create id from current time
-        id = int(current_time)
 
         # get network usage
         io_2 = psutil.net_io_counters()
@@ -88,9 +83,9 @@ if __name__ == "__main__":
                 
         # string to insert values into database
         sql = """INSERT INTO tracking 
-                (Id, T, Download_speed, Upload_speed, Memory_usage, Cpu_usage, Uptime, Readtime, Writetime) 
+                (T, Download_speed, Upload_speed, Memory_usage, Cpu_usage, Uptime, Readtime, Writetime) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
-        values =  (id, current_time, (ds / UPDATE_INTERVAL), (us / UPDATE_INTERVAL), memory_percent, cpu_percent, uptime_seconds, readtime, writetime)
+        values =  (current_time, (ds / UPDATE_INTERVAL), (us / UPDATE_INTERVAL), memory_percent, cpu_percent, uptime_seconds, readtime, writetime)
         
         mycursor.execute(sql, values)  
         mycursor.execute("commit")
@@ -110,12 +105,12 @@ if __name__ == "__main__":
             cpu_usage = process.cpu_percent()
             
             # string to insert values into database
-            sql = """INSERT INTO processes 
-                    (Id, T, Name, Memory_usage, Cpu_usage) 
+            sql_2 = """INSERT INTO processes 
+                    (T, Name, Memory_usage, Cpu_usage) 
                     VALUES (%s, %s, %s, %s, %s)"""
-            values =  (id, current_time, name, memory_usage, cpu_usage)
+            values_2 =  (current_time, name, memory_usage, cpu_usage)
             
-            mycursor.execute(sql, values)  
+            mycursor.execute(sql_2, values_2)  
             mycursor.execute("commit")
         
         
