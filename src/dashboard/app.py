@@ -30,14 +30,15 @@ query = "SELECT * FROM tracking"
 df_system = refreshData(db, query, pd.DataFrame())
 
 
-# create interesting charts from data
-fig = px.line(df_system, x="T", y="Upload_speed")
-fig2 = px.line(df_system, x="T", y="Download_speed")
-fig3 = px.line(df_system, x="T", y="Memory_usage")
-fig4 = px.line(df_system, x="T", y="Cpu_usage")
-fig5 = px.line(df_system, x="T", y="Uptime")
-fig6 = px.line(df_system, x="T", y="Readtime")
-fig7 = px.line(df_system, x="T", y="Writetime")
+# create scatter plot for data
+fig = px.scatter(df_system, x="T", y="Upload_speed")
+fig2 = px.scatter(df_system, x="T", y="Download_speed")
+fig3 = px.scatter(df_system, x="T", y="Memory_usage")
+fig4 = px.scatter(df_system, x="T", y="Cpu_usage")
+fig5 = px.scatter(df_system, x="T", y="Uptime")
+fig6 = px.scatter(df_system, x="T", y="Readtime")
+fig7 = px.scatter(df_system, x="T", y="Writetime")
+
 
 # Create a Dash layout
 app.layout = html.Div([
@@ -57,101 +58,39 @@ app.layout = html.Div([
     )
 ])
 
-# Define a callback to update the live graph
+# Define callback to update graph
 @app.callback(
-    dependencies.Output('graph1', 'figure'),
-    [dependencies.Input('interval-component', 'n_intervals')])
-
-def update_graph_live(n):
-    # get data from db
-    query = "SELECT * FROM tracking"
-    df_system = refreshData(db, query, pd.DataFrame())
-    
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Upload_speed")
-    return fig
-
-# Define a callback to update the live graph
-@app.callback(
+    [dependencies.Output('graph1', 'figure'),
     dependencies.Output('graph2', 'figure'),
-    [dependencies.Input('interval-component', 'n_intervals')])
-def update_graph_live(n):
-    # get data from db
-    query = "SELECT * FROM tracking"
-    df_system = refreshData(db, query, pd.DataFrame())
-    
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Download_speed")
-    return fig
-
-# Define a callback to update the live graph
-@app.callback(
     dependencies.Output('graph3', 'figure'),
-    [dependencies.Input('interval-component', 'n_intervals')])
-
-def update_graph_live(n):
-    # get data from db
-    query = "SELECT * FROM tracking"
-    df_system = refreshData(db, query, pd.DataFrame())
-    
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Memory_usage")
-    return fig
-
-# Define a callback to update the live graph
-@app.callback(
     dependencies.Output('graph4', 'figure'),
-    [dependencies.Input('interval-component', 'n_intervals')])
-
-def update_graph_live(n):
-    # get data from db
-    query = "SELECT * FROM tracking"
-    df_system = refreshData(db, query, pd.DataFrame())
-    
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Cpu_usage")
-    return fig
-
-# Define a callback to update the live graph
-@app.callback(
     dependencies.Output('graph5', 'figure'),
-    [dependencies.Input('interval-component', 'n_intervals')])
-
-def update_graph_live(n):
-    # get data from db
-    query = "SELECT * FROM tracking"
-    df_system = refreshData(db, query, pd.DataFrame())
-    
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Uptime")
-    return fig
-
-# Define a callback to update the live graph
-@app.callback(
     dependencies.Output('graph6', 'figure'),
+    dependencies.Output('graph7', 'figure')],
     [dependencies.Input('interval-component', 'n_intervals')])
-def update_graph_live(n):
+
+def update_graph(n):
     # get data from db
     query = "SELECT * FROM tracking"
     df_system = refreshData(db, query, pd.DataFrame())
     
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Readtime")
-    return fig
-
-# Define a callback to update the live graph
-@app.callback(
-    dependencies.Output('graph7', 'figure'),
-    [dependencies.Input('interval-component', 'n_intervals')])
-
-def update_graph_live(n):
-    # get data from db
-    query = "SELECT * FROM tracking"
-    df_system = refreshData(db, query, pd.DataFrame())
+    # create scatter plot for data
+    fig = px.scatter(df_system, x="T", y="Upload_speed")
+    fig2 = px.scatter(df_system, x="T", y="Download_speed")
+    fig3 = px.scatter(df_system, x="T", y="Memory_usage")
+    fig4 = px.scatter(df_system, x="T", y="Cpu_usage")
+    fig5 = px.scatter(df_system, x="T", y="Uptime")
+    fig6 = px.scatter(df_system, x="T", y="Readtime")
+    fig7 = px.scatter(df_system, x="T", y="Writetime")
     
-    # create interesting charts from data
-    fig = px.line(df_system, x="T", y="Writetime")
-    return fig
+    return fig, fig2, fig3, fig4, fig5, fig6, fig7
+
+# Style the app
+# https://codepen.io/chriddyp/pen/bWLwgP.css
+app.css.append_css({
+    "external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"
+})
+
 
 # Run the app
 if __name__ == '__main__':
