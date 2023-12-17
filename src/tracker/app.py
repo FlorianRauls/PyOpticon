@@ -7,7 +7,7 @@ import yaml
 import time
 
 # how often to update the database in seconds
-UPDATE_INTERVAL = 60
+UPDATE_INTERVAL = 30
 
 if __name__ == "__main__":
     db_keys = yaml.load(open("db.yaml"),Loader=yaml.FullLoader)
@@ -20,6 +20,8 @@ if __name__ == "__main__":
         port="3306",
         database="tracker"
         )
+    
+
     
     # try and debug if anything works here lol
     mycursor = db.cursor()
